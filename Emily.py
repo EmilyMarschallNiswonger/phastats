@@ -11,7 +11,9 @@ import argparse
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-filename = "samples/data1.fq"
+import html
+from pathlib import Path
+filename = "samples/child1_big.fq"
 
 def main():
     # read in file and create a list of strings, each string being every
@@ -19,32 +21,33 @@ def main():
     with open(filename, 'r') as file:
         lines = file.readlines()
         lines = lines[1::4]
-    # construct a dataframe with columns as the percent A, G, C, T at that specific index
     df = pd.DataFrame(columns=['%A', '%G', '%C', '%T'])
-    for i in range(len(lines[0])-1):
-        # count the number of each base at that position
-        A = sum([1 for line in lines if line[i] == 'A'])
-        G = sum([1 for line in lines if line[i] == 'G'])
-        C = sum([1 for line in lines if line[i] == 'C'])
-        T = sum([1 for line in lines if line[i] == 'T'])
-        # calculate the percentage of each base at that position
+    max_length = max(len(line) for line in lines)
+    for i in range(max_length):
+        A = sum(1 for line in lines if i < len(line) and line[i] == 'A')
+        G = sum(1 for line in lines if i < len(line) and line[i] == 'G')
+        C = sum(1 for line in lines if i < len(line) and line[i] == 'C')
+        T = sum(1 for line in lines if i < len(line) and line[i] == 'T')
         total = A + G + C + T
-        df.loc[i] = [A/total, G/total, C/total, T/total]
-    print(df.head())
+        if total > 0:  # avoid division by zero
+            df.loc[i] = [A/total, G/total, C/total, T/total]
     print("Number of rows: ", df.shape[0])
-    print(total)
 
     # plot the percent of each base per read. y axis is percent, and 
     # x axis is read position, or the row numnber
     # write the plot to an html file
-    plt.plot(df['%A'], label='A')  
-    plt.plot(df['%G'], label='G')
-    plt.plot(df['%C'], label='C')
-    plt.plot(df['%T'], label='T')
+    plt.plot(df['%A'], label='%A')  
+    plt.plot(df['%G'], label='%G')
+    plt.plot(df['%C'], label='%C')
+    plt.plot(df['%T'], label='%T')
     plt.xlabel('Read Position')
     plt.ylabel('Percent')
+    plt.title('Per-Base Sequence Content')
     plt.legend()
-    plt.show()
+    plt.savefig("plots/Per-base_sequnce_content.png", dpi=300)
+    with (open("sequence.html", "w")) as f:
+        f.write("<html><body><img src='plots/Per-base_sequnce_content.png' alt='plot'></body></html>")
+    
 
 
 
