@@ -154,12 +154,25 @@ def getPerBaseSequenceContent(filename):
     plt.legend()
     plt.savefig("plots/Per-base_sequnce_content.png", dpi=300)
 
+def compute_n50(lengths):
+    sorted_lengths = sorted(lengths, reverse=True)
+    cumulative_length = sum(sorted_lengths)
+    half_length = cumulative_length / 2
+    running_length = 0
+    for length in sorted_lengths:
+        running_length += length
+        if running_length >= half_length:
+            return length
+
 
 def main():
     parser = argparse.ArgumentParser(description='Conduct fastq analysis and plot the results.')
     parser.add_argument('input_file', type=str, help='Path to the input FASTQ file.')
     parser.add_argument('output_file', type=str, help='Prefix for the output plot filenames.')
     args = parser.parse_args()
+
+    # Compute N50
+    n50_value = compute_n50(lengths)
 
     # Generage plot for length and quality distribution
     getLengthQualityDistribution(args.input_file)
