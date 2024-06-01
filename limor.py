@@ -33,7 +33,7 @@ def plot_length_distribution(lengths, output_file):
 def plot_quality_distribution(quality_scores, output_file):
     plt.figure(figsize=(9, 5))
     plt.hist(quality_scores, bins=range(0, 41), color='#008000', alpha=0.5, edgecolor='black')  # Green color
-    plt.title('Quality Distribution of Sequences', fontsize=16, fontweight='bold')
+    plt.title('Quality Distribution of Bases', fontsize=16, fontweight='bold')
     plt.xlabel('Quality Score (Phred Score)', fontsize=13)
     plt.ylabel('Frequency', fontsize=13)
     plt.xticks(fontsize=12)
