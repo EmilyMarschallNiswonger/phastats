@@ -2,10 +2,13 @@
 
 import argparse
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import numpy as np
 import scipy.stats as stats
 import os
 import pandas as pd
+font_path = "C:/Users/emily/OneDrive/Documents/GitHub/phastats/fonts/Montserrat-Regular.ttf"
+font_prop = fm.FontProperties(fname=font_path, size=16)
 
 def getandPlotLengths(sequenceList):
     lengths = [len(sequence) for sequence in sequenceList]
@@ -18,8 +21,8 @@ def getandPlotQuality(qualityList):
 
 def plot_length_distribution(lengths):
     plt.figure(figsize=(9, 5))
-    plt.hist(lengths, bins=50, color='#0059b3', alpha=0.5, edgecolor='black')  # Blue color
-    plt.title('Length Distribution of Sequences', fontsize=16, fontweight='bold')
+    plt.hist(lengths, bins=50, color='#333333', alpha=0.5, edgecolor='black')  # Blue color
+    plt.title('Length Distribution of Sequences', fontsize=16, fontweight='bold', fontproperties=font_prop)
     plt.xlabel('Sequence Length', fontsize=13)
     plt.ylabel('Frequency', fontsize=13)
     plt.xticks(fontsize=12)
