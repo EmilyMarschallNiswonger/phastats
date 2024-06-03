@@ -1,10 +1,5 @@
 
 
-
-
-
-
-
 # Phastats
 
 A gene sequence statistics tool
@@ -37,8 +32,21 @@ pip install --user pandas numpy scipy matplotlib
 
 ## Running phastats
 
+After installing the necessary packages, `phastats.py` could be run.
 
+Use the following command to update permissions, commonly needed for mac:
 
+```
+chmod +x phastats.py
+```
+
+Here is how you would run `phastats.py` using this FASTQ file as an argument:
+
+As an example, a sample dataset `data1.fq` is located in the samples folder. To run `phastats` on this file, use the following command: 
+
+```
+./phastats.py ./samples/data1.fq 
+```
 
 ## Implementation
 
@@ -72,12 +80,12 @@ Using a .fq dataset as an argument, Phastats parses command-line arguments to ge
 `print_statistics` outputs various metrics for the provided FASTQ file such as filename, file type encoding, total count of sequences, sequences flagged as poor quality, average sequence length and percentage GC content. 
 
 
-
-
 ## Benchmarking
 
 for when we finish benchmarking it lol
 
+
+## Comparison/Contrast to 
 
 There are various reasons why the outputs of our phastats tool contrasts from the FastQC tool. To start, our Phastats tool computes the N50 of the .fq dataset, while FastQC does not. This is useful, for the N50 score provides another measure of the quality of a genome assembly in addition to the information displayed in the resulting html file.
 Another reason why these tools differ could be that FastQC was coded in Java, while Phastats was created in Python. Because of this, Phastats contains simple, readable syntax, allowing developers to express concepts in fewer lines of code. 

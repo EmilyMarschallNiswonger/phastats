@@ -165,7 +165,7 @@ def main():
     total_sequences, poor_quality_sequences, total_length, sequences, qualitylines, gc_count, gc_contents = parse_fastq(args.input_file)
     
     # Compute N50
-    n50_value = compute_n50(lengths)
+    #n50_value = compute_n50(lengths)
 
     # Generage plot for length and quality distribution
     getandPlotLengths(sequences)
