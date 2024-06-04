@@ -42,11 +42,29 @@ chmod +x phastats.py
 
 Here is how you would run `phastats.py` using this FASTQ file as an argument:
 
-As an example, a sample dataset `data1.fq` is located in the samples folder. To run `phastats` on this file, use the following command: 
+As an example, a sample dataset `data1.fq` is located in the samples folder. To run Phastats on this file, use the following command: 
 
 ```
 ./phastats.py ./samples/data1.fq 
 ```
+
+### Troubleshooting
+
+If running Phastats returns an error regarding installing packages like pandas, even after using the installation commands, Phastats could be ran using a virtual environment. To make and install this, use the following commands:
+
+```
+python3 -m venv myenv
+```
+
+```
+source myenv/bin/activate
+```
+
+```
+pip install pandas numpy scipy matplotlib argparse
+```
+
+This will create a virtual environment and install the necessary packages in order to run Phastats.
 
 ## Implementation
 
@@ -77,19 +95,39 @@ Using a .fq dataset as an argument, Phastats parses command-line arguments to ge
 
 `compute_n50` computes the N50 value, a measure of the quality of genome assemblies, by sorting sequence lengths and finding the length at which 50% of the total sequence length is contained.
 
-`print_statistics` outputs various metrics for the provided FASTQ file such as filename, file type encoding, total count of sequences, sequences flagged as poor quality, average sequence length and percentage GC content. 
+`print_statistics` outputs various metrics for the provided FASTQ file such as filename, file type encoding, total count of sequences, sequences flagged as poor quality, average sequence length and percentage GC content.
 
 
 ## Benchmarking
 
+
+### Public Datasets Used
+
+- **SRR29246139.fastq** NPs treated Read 1 (SRR29246139)(Illumina MiSeq) - This sample is a NPs feeded 16S amplicon product from rat gut microbiome were proceeded to sequencing. File contain single end file 1, this sample was submitted by the Capital University of Science and Technology.
+ 
+ **Public Link:** 
+ https://www.ncbi.nlm.nih.gov/sra/SRX24764511[accn]
+
+
+- **SRR29246140.fastq** Control Read 1 (SRR29246140) (Illumina MiSeq) - This sample is a control Sample 16S amplicon product from rat gut microbiome were proceeded to sequencing. File contain single end file 1, this sample was submitted by the Capital University of Science and Technology.
+
+**Public Link:**
+https://www.ncbi.nlm.nih.gov/sra/SRX24764510[accn]
+
+
+### Running the Samples
+
 for when we finish benchmarking it lol
 
+## Runtime Comparison
 
-## Comparison/Contrast to 
 
-There are various reasons why the outputs of our phastats tool contrasts from the FastQC tool. To start, our Phastats tool computes the N50 of the .fq dataset, while FastQC does not. This is useful, for the N50 score provides another measure of the quality of a genome assembly in addition to the information displayed in the resulting html file.
+## Comparison/Contrast to FastQC
+
+There are various reasons why the outputs of our Phastats tool contrasts from the FastQC tool. To start, our Phastats tool computes the N50 of the .fq dataset, while FastQC does not. This is useful, for the N50 score provides another measure of the quality of a genome assembly in addition to the information displayed in the resulting html file.
 Another reason why these tools differ could be that FastQC was coded in Java, while Phastats was created in Python. Because of this, Phastats contains simple, readable syntax, allowing developers to express concepts in fewer lines of code. 
 Finally, we have implemented a more modern design for our Phastats HTML file, which may enhance readability compared to FastQC.
+
 
 
 
