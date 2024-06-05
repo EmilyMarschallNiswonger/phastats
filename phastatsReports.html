@@ -1,3 +1,4 @@
+
 <html>
   <style type="text/css">
     @font-face {
@@ -26,12 +27,32 @@
       width: 45%;
       height: auto;
     }
+
+    .summary {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 5px;
+        width: 100%;
+        border-bottom: 1px solid #000;
+        border-top: 1px solid #000;
+    }
+    
+    p {
+        flex: 1 0 auto;
+        font-family: "Monsterrat", sans-serif;
+    }
   </style>
 
   <body>
     <h1>Phastats Report</h1>
+    <hr>
+    <div class="summary">
+    
+<p>Filename:                     samples/data1.fq</p><p>File type:                    FASTQ          </p><p>Total sequences:              6              </p><p>Sequences flagged as poor quality: 0              </p><p>Average sequence length:      101.00         </p><p>GC content (%):               42.41          </p>
+    </div>
+    <hr>
     <div class="image-container">
-      <img src="plots/Per-base_sequnce_content.png" alt="plot" />
+    <img src="plots/Per-base_sequnce_content.png" alt="plot" />
       <img src="plots/gc-distribution.png" alt="plot" />
       <img src="plots/length_distribution.png" alt="plot" />
       <img src="plots/quality-distribution.png" alt="plot" />
