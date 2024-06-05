@@ -7,8 +7,72 @@ import numpy as np
 import scipy.stats as stats
 import os
 import pandas as pd
-font_path = "C:/Users/emily/OneDrive/Documents/GitHub/phastats/fonts/Montserrat-Regular.ttf"
-font_prop = fm.FontProperties(fname=font_path, size=16)
+
+htmlString1 = """
+<html>
+  <style type="text/css">
+    @font-face {
+      font-family: "Monsterrat";
+      src: url("fonts/Montserrat-Regular.ttf") format("truetype");
+    }
+    body {
+      font-family: "Monsterrat", sans-serif;
+      margin: 20px;
+      background-color: ebf1f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #414850;
+      font-size: 5vw;
+    }
+    .image-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    img {
+      margin: 10px;
+      width: 45%;
+      height: auto;
+    }
+
+    .summary {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 5px;
+        width: 100%;
+        border-bottom: 1px solid #000;
+        border-top: 1px solid #000;
+    }
+    
+    p {
+        flex: 1 0 auto;
+        font-family: "Monsterrat", sans-serif;
+    }
+  </style>
+
+  <body>
+    <h1>Phastats Report</h1>
+    <hr>
+    <div class="summary">
+    
+"""
+
+htmlString2 = """
+    </div>
+    <hr>
+    <div class="image-container">
+    <img src="plots/Per-base_sequnce_content.png" alt="plot" />
+      <img src="plots/gc-distribution.png" alt="plot" />
+      <img src="plots/length_distribution.png" alt="plot" />
+      <img src="plots/quality-distribution.png" alt="plot" />
+    </div>
+  </body>
+</html>
+"""
+
 
 def getandPlotLengths(sequenceList):
     lengths = [len(sequence) for sequence in sequenceList]
@@ -18,28 +82,66 @@ def getandPlotQuality(qualityList):
     quality_scores = [ord(q) - 33 for q in qualityList[0]]  # Convert ASCII quality scores to Phred scores
     return plot_quality_distribution(quality_scores)
 
+def setup_plot(title, xlabel, ylabel):
+    plt.figure(figsize=(9, 5), facecolor='#ebf1f5')
+    ax = plt.gca()
+    ax.set_facecolor('#ebf1f5')
+    plt.title(title, fontsize=16, fontweight='bold')
+    plt.xlabel(xlabel, fontsize=13)
+    plt.ylabel(ylabel, fontsize=13)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.grid(True, linestyle='dotted')
+
+def plot_gc_distribution(gc_contents):
+    setup_plot('GC distribution over all sequences', 'Mean GC content (%)', 'Frequency')
+
+    # Histogram for GC content per read
+    count, bins, ignored = plt.hist(gc_contents, bins=50, density=True, alpha=0.6, color='#4A90E2', edgecolor='black', label='GC count per read')
+
+    # Fit a normal distribution to the data
+    mu, std = np.mean(gc_contents), np.std(gc_contents)
+    p = stats.norm.pdf(bins, mu, std)
+
+    # Plot the theoretical normal distribution
+    plt.plot(bins, p, linewidth=2, label='Theoretical Distribution', color='#D0021B')
+    plt.savefig("plots/gc-distribution.png", dpi=300)
+    plt.clf()
 
 def plot_length_distribution(lengths):
-    plt.figure(figsize=(9, 5))
-    plt.hist(lengths, bins=50, color='#333333', alpha=0.5, edgecolor='black')  # Blue color
-    plt.title('Length Distribution of Sequences', fontsize=16, fontweight='bold', fontproperties=font_prop)
-    plt.xlabel('Sequence Length', fontsize=13)
-    plt.ylabel('Frequency', fontsize=13)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.grid(True, linestyle='dotted')
-    plt.savefig("plots/length_distribution.png", dpi=300)  # Higher resolution
+    setup_plot('Length Distribution of Sequences', 'Sequence Length', 'Frequency')
+    plt.hist(lengths, bins=50, color='#4A90E2', alpha=0.5, edgecolor='black')  # Blue color
+    plt.savefig("plots/length_distribution.png", dpi=300) 
+    plt.clf()
 
 def plot_quality_distribution(quality_scores):
-    plt.figure(figsize=(9, 5))
-    plt.hist(quality_scores, bins=range(0, 41), color='#008000', alpha=0.5, edgecolor='black')  # Green color
-    plt.title('Quality Distribution of Bases', fontsize=16, fontweight='bold')
-    plt.xlabel('Quality Score (Phred Score)', fontsize=13)
-    plt.ylabel('Frequency', fontsize=13)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.grid(True, linestyle='dotted')
+    setup_plot('Quality Distribution of Bases', 'Quality Score (Phred Score)', 'Frequency')
+    plt.hist(quality_scores, bins=range(0, 41), color='#4A90E2', alpha=0.5, edgecolor='black')  # Green color
     plt.savefig("plots/quality-distribution.png", dpi=300)
+    plt.clf()
+
+def getandPlotPerBaseSequenceContent(lines):
+    # Read the FASTQ file and calculate the percent of each base per read
+    df = pd.DataFrame(columns=['%A', '%G', '%C', '%T'])
+    max_length = max(len(line) for line in lines)
+    for i in range(max_length):
+        A = sum(1 for line in lines if i < len(line) and line[i] == 'A')
+        G = sum(1 for line in lines if i < len(line) and line[i] == 'G')
+        C = sum(1 for line in lines if i < len(line) and line[i] == 'C')
+        T = sum(1 for line in lines if i < len(line) and line[i] == 'T')
+        total = A + G + C + T
+        if total > 0:  # avoid division by zero
+            df.loc[i] = [A/total, G/total, C/total, T/total]
+    # plot the percent of each base per read. y axis is percent, and 
+    # x axis is read position, or the row numnber
+    # write the plot to an html file
+    setup_plot('Per-Base Sequence Content', 'Read Position', 'Percent')
+    plt.plot(df['%A'], label='%A')  
+    plt.plot(df['%G'], label='%G')
+    plt.plot(df['%C'], label='%C')
+    plt.plot(df['%T'], label='%T')
+    plt.savefig("plots/Per-base_sequnce_content.png", dpi=300)
+    plt.clf()
 
 def getandPlotGCDistribution(gc_count, total_length, gc_contents):
     gc_content = calculate_gc_content(gc_count, total_length)
@@ -86,65 +188,21 @@ def parse_fastq(file):
 def calculate_gc_content(gc_count, total_length):
     return (gc_count / total_length) * 100 if total_length > 0 else 0
 
-def print_statistics(filename, total_sequences, poor_quality_sequences, total_length, gc_content):
+def write_statistics(filename, total_sequences, poor_quality_sequences, total_length, gc_content):
     average_length = total_length / total_sequences if total_sequences > 0 else 0
 
-    print(f"{'Measure':<30}{'Value':<15}")
-    print("-" * 45)
-    print(f"{'Filename':<30}{filename:<15}")
-    print(f"{'File type':<30}{'FASTQ':<15}")
-    print(f"{'Encoding':<30}{'Sanger / Illumina 1.8+':<15}")  # Assumed encoding
-    print(f"{'Total sequences':<30}{total_sequences:<15}")
-    print(f"{'Sequences flagged as poor quality':<30}{poor_quality_sequences:<15}")
-    print(f"{'Average sequence length':<30}{average_length:<15.2f}")
-    print(f"{'GC content (%)':<30}{gc_content:<15.2f}")
+    with open('phastatsReports.html', 'w') as f:
+        f.write(htmlString1)
+        f.write(f"<p>{'Filename: ':<30}{filename:<15}</p>")
+        f.write(f"<p>{'File type: ':<30}{'FASTQ':<15}</p>")  # Assumed encoding
+        f.write(f"<p>{'Total sequences: ':<30}{total_sequences:<15}</p>")
+        f.write(f"<p>{'Sequences flagged as poor quality: ':<30}{poor_quality_sequences:<15}</p>")
+        f.write(f"<p>{'Average sequence length: ':<30}{average_length:<15.2f}</p>")
+        f.write(f"<p>{'GC content (%): ':<30}{gc_content:<15.2f}</p>")
 
-def plot_gc_distribution(gc_contents):
-    plt.figure(figsize=(10, 6))
+        f.write(htmlString2)
 
-    # Histogram for GC content per read
-    count, bins, ignored = plt.hist(gc_contents, bins=50, density=True, alpha=0.6, color='r', edgecolor='black', label='GC count per read')
 
-    # Fit a normal distribution to the data
-    mu, std = np.mean(gc_contents), np.std(gc_contents)
-    p = stats.norm.pdf(bins, mu, std)
-
-    # Plot the theoretical normal distribution
-    plt.plot(bins, p, 'b-', linewidth=2, label='Theoretical Distribution')
-
-    plt.xlabel('Mean GC content (%)')
-    plt.ylabel('Frequency')
-    plt.title('GC distribution over all sequences')
-    plt.legend(loc='upper right')
-    plt.grid(True)
-    plt.savefig("plots/gc-distribution.png", dpi=300)
-    plt.clf()
-
-def getandPlotPerBaseSequenceContent(lines):
-    # Read the FASTQ file and calculate the percent of each base per read
-    df = pd.DataFrame(columns=['%A', '%G', '%C', '%T'])
-    max_length = max(len(line) for line in lines)
-    for i in range(max_length):
-        A = sum(1 for line in lines if i < len(line) and line[i] == 'A')
-        G = sum(1 for line in lines if i < len(line) and line[i] == 'G')
-        C = sum(1 for line in lines if i < len(line) and line[i] == 'C')
-        T = sum(1 for line in lines if i < len(line) and line[i] == 'T')
-        total = A + G + C + T
-        if total > 0:  # avoid division by zero
-            df.loc[i] = [A/total, G/total, C/total, T/total]
-    # plot the percent of each base per read. y axis is percent, and 
-    # x axis is read position, or the row numnber
-    # write the plot to an html file
-    plt.plot(df['%A'], label='%A')  
-    plt.plot(df['%G'], label='%G')
-    plt.plot(df['%C'], label='%C')
-    plt.plot(df['%T'], label='%T')
-    plt.xlabel('Read Position')
-    plt.ylabel('Percent')
-    plt.title('Per-Base Sequence Content')
-    plt.legend()
-    plt.savefig("plots/Per-base_sequnce_content.png", dpi=300)
-    plt.clf()
 
 def compute_n50(lengths):
     sorted_lengths = sorted(lengths, reverse=True)
@@ -179,7 +237,7 @@ def main():
 
     # Generate plot for perbase sequence content
     getandPlotPerBaseSequenceContent(sequences)
-
+    write_statistics(args.input_file, total_sequences, poor_quality_sequences, total_length, calculate_gc_content(gc_count, total_length))
 
 
 
