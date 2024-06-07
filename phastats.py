@@ -17,7 +17,7 @@ htmlString1 = """
     }
     body {
       font-family: "Monsterrat", sans-serif;
-      margin: 20px;
+      margin: 15px;
       background-color: ebf1f5;
       display: flex;
       flex-direction: column;
@@ -25,7 +25,7 @@ htmlString1 = """
     }
     h1 {
       color: #414850;
-      font-size: 5vw;
+      font-size: 4vw;
     }
     .image-container {
       display: flex;
@@ -33,8 +33,8 @@ htmlString1 = """
       justify-content: space-around;
     }
     img {
-      margin: 10px;
-      width: 45%;
+      margin: 8px;
+      width: 43%;
       height: auto;
     }
 
@@ -45,6 +45,9 @@ htmlString1 = """
         width: 100%;
         border-bottom: 1px solid #000;
         border-top: 1px solid #000;
+        font-family: "Monsterrat", sans-serif;
+        align-items: center;
+        justify-content: space-around;
     }
     
     p {
@@ -188,7 +191,7 @@ def parse_fastq(file):
 def calculate_gc_content(gc_count, total_length):
     return (gc_count / total_length) * 100 if total_length > 0 else 0
 
-def write_statistics(filename, total_sequences, poor_quality_sequences, total_length, gc_content):
+def write_statistics(filename, total_sequences, poor_quality_sequences, total_length, gc_content, n50_value):
     average_length = total_length / total_sequences if total_sequences > 0 else 0
 
     with open('phastatsReports.html', 'w') as f:
@@ -199,12 +202,13 @@ def write_statistics(filename, total_sequences, poor_quality_sequences, total_le
         f.write(f"<p>{'Sequences flagged as poor quality: ':<30}{poor_quality_sequences:<15}</p>")
         f.write(f"<p>{'Average sequence length: ':<30}{average_length:<15.2f}</p>")
         f.write(f"<p>{'GC content (%): ':<30}{gc_content:<15.2f}</p>")
-
+        f.write(f"<p>{'N50 Value: ':<30}{n50_value:<15.2f}</p>")
         f.write(htmlString2)
 
 
 
 def compute_n50(lengths):
+    lengths = [len(s) for s in lengths]
     sorted_lengths = sorted(lengths, reverse=True)
     cumulative_length = sum(sorted_lengths)
     half_length = cumulative_length / 2
@@ -226,7 +230,7 @@ def main():
     total_sequences, poor_quality_sequences, total_length, sequences, qualitylines, gc_count, gc_contents = parse_fastq(args.input_file)
     
     # Compute N50
-    #n50_value = compute_n50(lengths)
+    n50_value = compute_n50(sequences)
 
     # Generage plot for length and quality distribution
     getandPlotLengths(sequences)
@@ -237,7 +241,7 @@ def main():
 
     # Generate plot for perbase sequence content
     getandPlotPerBaseSequenceContent(sequences)
-    write_statistics(args.input_file, total_sequences, poor_quality_sequences, total_length, calculate_gc_content(gc_count, total_length))
+    write_statistics(args.input_file, total_sequences, poor_quality_sequences, total_length, calculate_gc_content(gc_count, total_length), n50_value)
 
 
 
